@@ -48,7 +48,7 @@ function install_panel() {
     panel_update=$?
     update_config "$package_mode" "$force"
     config_update=$?
-    post_update_tasks "$panel_update" "$config_update"
+    post_update_tasks  "$panel_update" "$config_update" "$package_mode"
 
     if is_installed hiddifypanel && [[ -z "$package_mode" || ($package_mode == "develop" || $package_mode == "beta" || $package_mode == "release") ]]; then
         (cd /opt/hiddify-manager/hiddify-panel && hiddifypanel set-setting -k package_mode -v $1)
@@ -64,7 +64,15 @@ function update_panel() {
     # Set panel_update to 1 if an update is performed
 
     case "$package_mode" in
-    develop)
+    v.*)
+        update_progress "Updating..." "Hiddify Panel from $current_panel_version to $latest" 10
+        panel_path=$(hiddifypanel_path)
+        pip3 install -U --no-deps --force-reinstall git+https://github.com/hiddify/HiddifyPanel#${package_mode}
+        pip3 install git+https://github.com/hiddify/HiddifyPanel#${package_mode}        
+        update_progress "Updated..." "Hiddify Panel to ${package_mode}" 50
+        return 0        
+        ;;
+    develop|dev)
         # Use the latest commit from GitHub
         latest=$(get_commit_version Hiddify-Panel)
 
@@ -122,7 +130,13 @@ function update_config() {
     local current_config_version=$(get_installed_config_version)
 
     case "$package_mode" in
-    develop)
+    v.*)        
+        update_progress "Updating..." "Hiddify Config from $current_config_version to $latest" 60
+        update_from_github "hiddify-manager.zip" "https://github.com/hiddify/Hiddify-Manager/archive/refs/tags/${package_mode}.zip" $latest
+        update_progress "Updated..." "Hiddify Config to $latest" 100
+        return 0
+        ;;
+    develop|dev)
         local latest=$(get_commit_version hiddify-manager)
         echo "DEVELOP: Current Config Version=$current_config_version -- Latest=$latest"
         if [[ "$force" == "true" || "$latest" != "$current_config_version" ]]; then
@@ -168,6 +182,7 @@ function update_config() {
 function post_update_tasks() {
     local panel_update=$1
     local config_update=$2
+    local package_mode=$3
 
     if [[ $config_update != 0 ]]; then
         echo "---------------------Finished!------------------------"
@@ -178,10 +193,23 @@ function post_update_tasks() {
     fi
     systemctl start hiddify-panel
 
+
+    cd /opt/hiddify-manager/hiddify-panel
     if [ "$CREATE_EASYSETUP_LINK" == "true" ];then
-        cd /opt/hiddify-manager/hiddify-panel
         hiddifypanel set_setting --key create_easysetup_link --value True
     fi
+
+    case "$package_mode" in
+        release|beta)
+            hiddifypanel set_setting --key package_mode --value $package_mode
+            ;;
+        dev|develop)
+            hiddifypanel set_setting --key package_mode --value develop
+            ;;
+        *)
+            hiddifypanel set_setting --key auto_update --value False
+            ;;
+    esac
 
     if [[ $panel_update == 0 && $config_update != 0 ]]; then
         bash /opt/hiddify-manager/apply_configs.sh --no-gui --no-log

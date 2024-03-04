@@ -5,6 +5,8 @@
 
 ### New
 
+* Add custom version installation. [hiddify-com]
+
 * Add more security for first login. [hiddify-com]
 
 * Add faketls. [hiddify-com]
@@ -100,6 +102,16 @@
 * Restructure reality hysteria2 tuic port management. [hiddify]
 
 ### Fix
+
+* B ug. [hiddify-com]
+
+* Bug. [hiddify-com]
+
+* Bug. [hiddify-com]
+
+* No commit message. [hiddify-com]
+
+* No commit message. [hiddify-com]
 
 * Bug. [hiddify-com]
 
@@ -488,6 +500,20 @@
 * Remove remote. [hiddify]
 
 ### Other
+
+* Disable download youtube. [hiddify-com]
+
+* Fix. [hiddify-com]
+
+* Update. [hiddify-com]
+
+* Add version to paramers. [hiddify-com]
+
+* New add version var. [hiddify-com]
+
+* Depracted old release method. [hiddify-com]
+
+* Update README.md. [Hiddify]
 
 * Update displaying install situation. [hiddify-com]
 
